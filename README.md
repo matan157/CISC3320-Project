@@ -31,8 +31,8 @@ Since sos does not create an object of type os and call its constructor, you mus
 
 To run the program from the command line:
 
-1.Copy sos.class, jobtype.class and Format.class into your directory.
-2.javac \*.java	(compile all your necessary Java files)
-3.java sos	(run my program)
+1. Copy sos.class, jobtype.class and Format.class into your directory.
+2. javac \*.java	(compile all your necessary Java files)
+3. java sos	(run my program)
 
 The 'sos.class' file and other .class files may be used in DOS, Windows, UNIX and MacOS, since the Java Virtual Machine will interpret the bytecode in the correct way for that machine. Java's type sizes are the same for all machines (i.e. an int is the same size on the PC as on a Sun), so you don't have to change everything to long if you will be doing it on a PC.
