@@ -12,5 +12,7 @@ public class OS {
 
 	public static void Svc (int[] a, int[] p) {}
 
+    public static void Startup() {}
+
 }
 
