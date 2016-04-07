@@ -36,3 +36,5 @@ To run the program from the command line:
 3. java sos	(run my program)
 
 The 'sos.class' file and other .class files may be used in DOS, Windows, UNIX and MacOS, since the Java Virtual Machine will interpret the bytecode in the correct way for that machine. Java's type sizes are the same for all machines (i.e. an int is the same size on the PC as on a Sun), so you don't have to change everything to long if you will be doing it on a PC.
+
+Nicholas Galarza
