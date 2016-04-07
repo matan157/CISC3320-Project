@@ -1,3 +1,5 @@
+import Classes.*;
+
 public class OS {
 
 	public OS {}
