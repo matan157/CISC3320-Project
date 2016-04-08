@@ -1,5 +1,3 @@
-using java.utils.*;
-
 public class PCB {
     
     // State constants
@@ -9,17 +7,17 @@ public class PCB {
     private static final int WAITING = 3;
     private static final int HALTED = 4;
     
-    private static string PID; // Process ID
+    private static int PID; // Process ID
     private int state; // 0 - 4 will represent states
     private int PC; // Program Counter
     
     // TODO: Add CPU scheduling
     // TODO: Add Memory Management
     
-    public PCB(string PID, int state, int PC) {
+    public PCB(int PID, int state, int PC) {
         // Check if state is valid.
         if (state > 4 || state < 0) {
-            throw new RuntimeException("State is invalid.")
+            throw new RuntimeException("State is invalid.");
         }
         this.PID = PID;
         this.state = state;
@@ -30,7 +28,7 @@ public class PCB {
     //////// Possibly setters for everything.
     
     // Returns PID as INT
-    public string getPID() {
+    public int getPID() {
         return this.PID;
     }
     

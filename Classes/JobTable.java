@@ -1,4 +1,4 @@
-using java.utils.*;
+import java.util.*;
 
 public class JobTable {
     
