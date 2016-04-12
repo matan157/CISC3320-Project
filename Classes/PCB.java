@@ -8,13 +8,13 @@ public class PCB {
     private static final int HALTED = 4;
     
     private static int PID; // Process ID
-    private int state; // 0 - 4 will represent states
+    private State state; // 0 - 4 will represent states
     private int PC; // Program Counter
     
     // TODO: Add CPU scheduling
     // TODO: Add Memory Management
     
-    public PCB(int PID, int state, int PC) {
+    public PCB(int PID, State state, int PC) {
         // Check if state is valid.
         if (state > 4 || state < 0) {
             throw new RuntimeException("State is invalid.");
@@ -33,7 +33,7 @@ public class PCB {
     }
     
     // Returns state as INT
-    public int getState() {
+    public State getState() {
         return this.state;
     }
     
