@@ -1,8 +1,6 @@
-import Classes.*;
+public class os {
 
-public class OS {
-
-	public OS {}
+	public static void Startup() {}
 
 	public static void Crint (int[] a, int[] p) {}
 
@@ -14,7 +12,6 @@ public class OS {
 
 	public static void Svc (int[] a, int[] p) {}
 
-    public static void Startup() {}
 
 }
 
