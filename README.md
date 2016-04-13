@@ -1,6 +1,12 @@
 # CISC3320-Project
 Simulating an OS in Java.
 
+## How to run the project
+1. Run the command `make` in terminal. This creates the necessary files.
+2. Run the command `java sos`.
+3. For cleanup run `make clean`.
+4. That's it!
+
 **The following are Jones' classes:**
 ```
     - sos.class
