@@ -1,29 +1,53 @@
-import java.util.LinkedList;
+import java.util.TreeMap;
+import java.util.*;
 
 public class JobTable {
-    private LinkedList<PCB> jobtable; // List of jobs
+	private static TreeMap jobTable;
     private static final int LIMIT = 50; // Max size of jobtable
-    
-    // Construct empty list
+	private static int jobsInTable;
+   
+	// constructs empty table 
     public JobTable() {
-        this.jobtable = new LinkedList<PCB>();
+		jobTable = new TreeMap();
+		jobsInTable = 0;
     }
     
-    // Construct list with one job
-    // Might not be used
+	// constructs table and adds one job
     public JobTable(PCB pcb) {
-        this.jobtable = new LinkedList<PCB>();
-        jobtable.add(pcb);
+		jobTable = new TreeMap();
+		jobTable.put(pcb.getPID(), pcb);
+		jobsInTable = 1;
     }
     
     // Adding a job to the job table
-    public void addJob(PCB pcb) {
-        // Check if @ the limit
-        if(jobtable.size() > LIMIT) {
-            System.out.println("Cannot add job. Job table is full.");
-            return;
-        }
-        jobtable.add(pcb);
-        return;
+	public static void addJob(PCB pcb) {
+		if(jobsInTable < LIMIT) {
+			jobTable.put(pcb.getPID(), pcb);
+			jobsInTable++;
+		} else {
+			System.out.println("Cannot add job. Table full.");
+		}
+		return;
     }
+
+	// Removes a job from the job table
+	public static void removeJob(PCB pcb) {
+		if(jobsInTable > 0) {
+			jobTable.remove(pcb.getPID());
+			jobsInTable--;
+		} else {
+			System.out.println("Cannot remove job. Table is empty.");
+		}
+		return;
+	}
+	
+	// Returns a job
+	public PCB getJob(int PID) {
+		return (PCB)jobTable.get(PID);
+	}
+
+	// Returns a boolean based on whether the job exists
+	public boolean contains(int PID) {
+		return jobTable.containsKey(PID);
+	}
 }
