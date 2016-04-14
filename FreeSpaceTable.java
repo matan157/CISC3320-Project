@@ -1,11 +1,16 @@
+/*/
+	FreeSpaceTable provides an array where every index is 1k of memory
+	According to the project specs, the size should be 100k, but want that
+	to be declared in the main program os.java.
+/*/
 import java.util.*;
 
 public class FreeSpaceTable {
 
 	private static int worstSpaceAddress;
 	private static int worstSpaceSize;
-	private static int SIZE_OF_MEMORY;
-	private int[] FST;
+	private static int SIZE_OF_MEMORY; // Should be 100
+	private int[] FST; // 1k spaces
 
 	// Constructor takes memory size
 	public FreeSpaceTable(int SIZE_OF_MEMORY) {
@@ -64,18 +69,22 @@ public class FreeSpaceTable {
 		int largestSizeAddress = 0;
 
 		for(int i = 0; i < SIZE_OF_MEMORY; i++) {
+			// See how big we can get
 			if(FST[i] == 0) {
 				tempSize++;
 			} else {
+				// Set new largest size
 				if(tempSize > largestSize) {
 					largestSize = tempSize;
 					largestSizeAddress = tempAddress;
 				}
+				// Reset temp location.
 				tempAddress = i+1;
 				tempSize = 0;
 			}
 		}
-
+		
+		// Making sure we got the right size
 		if(largestSize == 0 && tempSize != 0) {
 			largestSize = tempSize;
 			largestSizeAddress = tempAddress;
@@ -83,13 +92,13 @@ public class FreeSpaceTable {
 			largestSize = tempSize;
 			largestSizeAddress = tempAddress;
 		}
-
+		
+		// After finding the largest space add it to the object
 		worstSpaceAddress = largestSizeAddress;
 		worstSpaceSize = largestSize;
 	}
 
 	// Getters
-
 	public int getWorstSpaceAddress() { return worstSpaceAddress;}
 	public int getWorstSpaceSize() { return worstSpaceSize; }
 

@@ -1,3 +1,8 @@
+/*/
+	PCB Class is a Process Control Block for jobs
+	It contains all the information possibly needed.
+	Maybe even more.
+/*/
 public class PCB {
     
     // State constants
@@ -15,7 +20,10 @@ public class PCB {
 	private boolean latched;
 	private boolean inCore;
 	private boolean terminated;
-	    
+	 
+	// Constructor   
+	// When the job is created it is not latched, incore, or blocked.
+	// It has no address until it's put into memory
 	public PCB(int PID, int priority, int jobSize, int maxCpuTime, int timeArrived) {
 		this.PID = PID;
 		this.priority = priority;
@@ -24,13 +32,14 @@ public class PCB {
 		this.timeArrived = timeArrived;
 		cpuTimeUsed = 0;
 		ioPending = 0;
-		blocked = false;
+		blocked = false; 
 		latched = false;
 		inCore = false;
 		terminated = false;
 		timesBlocked = 0;
 		address = -1;
 	}
+	
 	// GETTERS 
 	public int getPID() { return PID; } 
 	public int getTimesBlocked() { return timesBlocked; }
@@ -51,15 +60,15 @@ public class PCB {
 	public void setAddress(int address) {
 		this.address = address; 
 	}
-
+	
 	public void setLastTimeProcessing(int lastTimeProcessing) {
 		this.lastTimeProcessing = lastTimeProcessing;
 	}
-
+	// How much time it has been processed
 	public void calculateTimeProcessed(int currentTime) {
 		cpuTimeUsed += currentTime - lastTimeProcessing;
 	}
-
+	// Increment and Decrement
 	public void incTimeBlocked() { timesBlocked++; }
 	public void incIoCount() { ioPending++; }
 	public void decIoCount() { ioPending--; }
