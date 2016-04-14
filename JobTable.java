@@ -3,13 +3,14 @@ import java.util.*;
 
 public class JobTable {
 	private static TreeMap jobTable;
-    private static final int LIMIT = 50; // Max size of jobtable
 	private static int jobsInTable;
+	private static int SIZE;
    
-	// constructs empty table 
-    public JobTable() {
+	// Takes a SIZE variable and initializes a jobtable of that size. 
+    public JobTable(int SIZE) {
 		jobTable = new TreeMap();
 		jobsInTable = 0;
+		this.SIZE = SIZE;
     }
     
 	// constructs table and adds one job
@@ -21,7 +22,7 @@ public class JobTable {
     
     // Adding a job to the job table
 	public static void addJob(PCB pcb) {
-		if(jobsInTable < LIMIT) {
+		if(jobsInTable < SIZE) {
 			jobTable.put(pcb.getPID(), pcb);
 			jobsInTable++;
 		} else {

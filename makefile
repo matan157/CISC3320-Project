@@ -1,6 +1,7 @@
-CLASSES = JobTable.class PCB.class os.class
+DEP = JobTable.class PCB.class FreeSpaceTable.class
+CLASSES = $(DEP) os.class
 
-os.class: JobTable.class PCB.class
+os.class: $(DEP) 
 	javac os.java
 
 JobTable.class: 
@@ -8,6 +9,9 @@ JobTable.class:
 
 PCB.class:
 	javac PCB.java
+
+FreeSpaceTable.class:
+	javac FreeSpaceTable.java
 
 clean:
 	rm $(CLASSES)
