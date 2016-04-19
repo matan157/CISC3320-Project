@@ -25,7 +25,7 @@ public class os{
 	private static List<PCB> ioQueue = new ArrayList<PCB>();
 
 	// Initialize variables to be used here! Initialize more objects as you go! 
-	public static void Startup() {
+	public static void startup() {
 		
 		jobTable = new JobTable(50); // Limit = 50. 
 		freeSpaceTable = new FreeSpaceTable(100); // 100k bytes. 
