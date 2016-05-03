@@ -1,4 +1,3 @@
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,22 +15,23 @@ public class os{
 	
 	private static JobTable jobTable; 
 	private static FreeSpaceTable freeSpaceTable;
-	private static PCB currentRunningJob, lastRunningJobPCB, lastJobToDrum;
+	private static PCB currentRunningJob, lastRunningJobPCB, lastJobToDrum, lastJobToIO;
 	private static final int ROUNDROBINSLICE = 9; 
-	private static boolean swap; // For the swapper() function.
+	private static boolean swap, doingIO; // For the swapper() function and Dskint() respectively.
 	private static List<PCB> readyQueue = new ArrayList<PCB>();
 	private static List<PCB> drumToMemoryQueue = new ArrayList<PCB>();
 	private static List<PCB> memoryToDrumQueue = new ArrayList<PCB>();
 	private static List<PCB> ioQueue = new ArrayList<PCB>();
 
 	// Initialize variables to be used here! Initialize more objects as you go! 
-	public static void startup() {
+	public static void Startup() {
 		
 		jobTable = new JobTable(50); // Limit = 50. 
 		freeSpaceTable = new FreeSpaceTable(100); // 100k bytes. 
 		currentRunningJob = null;
 		lastRunningJobPCB = null;
 		lastJobToDrum = null;
+		lastJobToIO = null; 
 	       	swap = false; 	
 	}
 	
@@ -57,18 +57,111 @@ public class os{
 
 	}
 
-	//TODO: The rest of these methods. 	
-	public static void Dskint (int[] a, int[] p) {}
+	// Inovked when a job returns from doing IO. 
+	public static void Dskint (int[] a, int[] p) {
+		doingIO = false; 
+		
+		if(lastRunningJobPCB != null) {
+			lastRunningJobPCB.calculateTimeProcessed(p[5]); 
+			readyQueue.addJob(lastRunningJobPCB);
+		}
+		
+		//lastJobToIo is a variable I created unsure if another needs to be used. 
+		if(jobTable.contains(lastJobToIo.getJob()) {   
+			lastJobToIO.decIoCount(); 
+			lastJobToIO.unlatchJob(); 
+			
+			if(lastJobToIo.getIoCount() == 0) { 
+				if(lastJobToIO.isTerminated()) { 
+					freeSpaceTable.addSpace(lastJobToIO); 
+					jobTable.removeJob(lastJobToIO); 
+				} else if (lastJobToIO.isBlocked()) { 
+					lastJobToIO.unblockJob(); 
+					timesBlocked--; 
+					readyQueue.addJob(lastJobToIO); 
+				} else { 
+					readyQueue.addJob(lastJobToIO); 
+				}//end else if
+			}//end if  
+		}//end if 
+		 
+		ioManager(); 
+		CpuScheduler(a, p); 		
+	}
 	
-	public static void Drmint (int[] a, int[] p) {}
+	//Invoked when the drum swaps a job in or out of memory/after siodrum is invoked.  	
+	public static void Drmint (int[] a, int[] p) {
+		swap = false; 
 
-	public static void Tro  (int[] a, int[] p) {}
+		if(lastRunningJobPCB != null) { 
+			lastRunningJobPCB.calculateTimeProcessed(p[5]); 
+			readyQueue.add(lastRunningJobPCB); 
+		}//end if
 
+		currentRunningJob = lastJobToDrum; 
+
+		if(!currentRunningJob.isInCore()) { 
+			//currentRunningJob.putInCore(); 
+			readyQueue.add(currentRunningJob); 
+			
+			for(int i = 0; i < currentRunningJob.getIoCount(); i++) { 
+				ioQueue.add(currentRunningJob); 
+			}//end for
+		} else { 
+			//currentRunningJob.removeInCore();
+			freeSpaceTable.addSpace(currentRunningJob);  
+			drumToMemoryQueue.add(currentRunningJob);		 
+			memoryToDrumQueue.remove(currentRunningJob); 
+		}//end if else 
+
+		Swapper(); 
+		CpuScheduler(a, p);  
+	}
+ 	
+	//Invoked when a job has used up its time slice. 
+	public static void Tro  (int[] a, int[] p) {
+		lastRunningJobPCB.calculateTimeProcessed(p[5]); 
+
+		if(lastRunningJobPCB.getCpuTimeUsed >= lastRunningJobPCB.getMaxCpuTime()) { 
+			if(lastRunningJobPCB.getIoCount() > 0) { 
+				lastRunningJobPCB.terminateJob(); 
+			} else { 
+				freeSpaceTable.addSpace(lastRunningJobPCB); 
+				jobTable.removeJob(lastRunningJobPCB); 
+			}//end if else
+
+			Swapper(); 
+			ioManager();  
+		} else { 
+			readyQueue.add(currentRunningJob); 
+		}//end if else 
+
+		CpuScheduler(a, p); 
+	}
+ 	
+	//TODO: The rest of these methods. 	
 	public static void Svc (int[] a, int[] p) {}
+
+	//Invoked by intterupt handler to manage IO requests. 
+	public static void ioManager() { 
+		if(ioQueue.size() != 0 && !doingIO) { 
+			for(int i = 0; i < ioQueue.size(); i++) { 
+				currentRunningJob = ioQueue.get(i); 
+				ioQueue.remove(i); 
+
+				lastJobToIO = currentRunningJob; 
+				doingIO = true; 
+				currentRunningJob.latchJob(); 
+
+				sos.siodisk(currentRunningJob.getJob());
+				break; 
+			}//end for 
+		}//end if   
+	}
 	
 	//TODO: We can probably leave this to the fine-tuning portion of our code, but the way 
 	// the memory manager was implemented is different from what was described 
-	// in Jones' specifications. Just a heads up if there's time. 	
+	// in Jones' specifications. Just a heads up if there's time.
         public static void MemoryManager(PCB job){
 	
 		drumToMemoryQueue.add(job);
