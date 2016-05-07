@@ -111,7 +111,7 @@ public class os{
 			//currentRunningJob.removeInCore();
 			freeSpaceTable.addSpace(currentRunningJob);  
 			drumToMemoryQueue.add(currentRunningJob);		 
-			memoryToDrumQueue.remove(currentRunningJob); 
+			memoryToDrumQueue.removeJob(currentRunningJob); 
 		}//end if else 
 
 		Swapper(); 
@@ -139,8 +139,39 @@ public class os{
 		CpuScheduler(a, p); 
 	}
  	
-	//TODO: The rest of these methods. 	
-	public static void Svc (int[] a, int[] p) {}
+	//Invoked when a job requests a service. 	
+	public static void Svc (int[] a, int[] p) {
+		lastRunningJobPCB.calculateTimeProcessed(p[5]); 
+		readyQueue.add(lastRunningJobPCB); 
+
+		if(a[0] == 5)  {
+			while(readyQueue.contains(lastRunningJobPCB)) {readyQueue.removeJob(lastRunningJobPCB);} 
+			while(drumToMemoryQueue.contains(lastRunningJobPCB)) {memoryToDrumQueue.removeJob(lastRunningJobPCB);} 
+			
+			if(lastRunningJobPCB.getIoCount() > 0) { 
+				lastRunningJobPCB.terminateJob(); 
+			} else { 
+				lastRunningJobPCB.removeInCore(); 
+				freeSpaceTable.addSpace(lastRunningJobPCB); 
+				jobTable.removeJob(lastRunningJobPCB);
+			} 
+		} else if(a[0] == 6) { 
+			lastRunningJobPCB.incrementIoCount(); 
+			ioQueue.add(lastRunningJobPCB); 
+			ioManager(): 
+		} else if(a[0] == 7) { 
+			if(lastRunningJobPCB.getIoCount() != 0) { 
+				readyQueue.removeJob(lastRunningJobPCB); 
+				lastRunningJobPCB.blockJob(); 
+				
+				blockCount++; 
+				if(blockcount > BLOCKTHRESHOLD && !lastRunningJobPCB.isLatched()) { 
+					memoryToDrumQueue.add(lastRunningJobPCB); 
+					Swapper(); 
+				}//end if 
+			}//end if
+		}//end if else  
+	}
 
 	//Invoked by intterupt handler to manage IO requests. 
 	public static void ioManager() { 
