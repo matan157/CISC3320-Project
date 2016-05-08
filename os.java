@@ -67,7 +67,7 @@ public class os{
 		}
 		
 		//lastJobToIo is a variable I created unsure if another needs to be used. 
-		if(jobTable.contains(lastJobToIo.getJob()) {   
+		if(jobTable.contains(lastJobToIo.getJob())) {   
 			lastJobToIO.decIoCount(); 
 			lastJobToIO.unlatchJob(); 
 			
@@ -158,7 +158,7 @@ public class os{
 		} else if(a[0] == 6) { 
 			lastRunningJobPCB.incrementIoCount(); 
 			ioQueue.add(lastRunningJobPCB); 
-			ioManager(): 
+			ioManager(); 
 		} else if(a[0] == 7) { 
 			if(lastRunningJobPCB.getIoCount() != 0) { 
 				readyQueue.removeJob(lastRunningJobPCB); 
