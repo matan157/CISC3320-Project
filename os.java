@@ -17,6 +17,8 @@ public class os{
 	private static FreeSpaceTable freeSpaceTable;
 	private static PCB currentRunningJob, lastRunningJobPCB, lastJobToDrum, lastJobToIO;
 	private static final int ROUNDROBINSLICE = 9; 
+	private static final int BLOCKTHRESHOLD = 1;
+	private static int blockCount;
 	private static boolean swap, doingIO; // For the swapper() function and Dskint() respectively.
 	private static List<PCB> readyQueue = new ArrayList<PCB>();
 	private static List<PCB> drumToMemoryQueue = new ArrayList<PCB>();
@@ -24,7 +26,7 @@ public class os{
 	private static List<PCB> ioQueue = new ArrayList<PCB>();
 
 	// Initialize variables to be used here! Initialize more objects as you go! 
-	public static void Startup() {
+	public static void startup() {
 		
 		jobTable = new JobTable(50); // Limit = 50. 
 		freeSpaceTable = new FreeSpaceTable(100); // 100k bytes. 
@@ -32,7 +34,8 @@ public class os{
 		lastRunningJobPCB = null;
 		lastJobToDrum = null;
 		lastJobToIO = null; 
-	       	swap = false; 	
+	       	swap = false;
+		blockCount = 0;
 	}
 	
 	 
@@ -66,18 +69,18 @@ public class os{
 			readyQueue.add(lastRunningJobPCB);
 		}
 		
-		//lastJobToIo is a variable I created unsure if another needs to be used. 
-		if(jobTable.contains(lastJobToIo.getJob())) {   
+		//lastJobToIO is a variable I created unsure if another needs to be used. 
+		if(jobTable.contains(lastJobToIO.getPID())) {   
 			lastJobToIO.decIoCount(); 
 			lastJobToIO.unlatchJob(); 
 			
-			if(lastJobToIo.getIoCount() == 0) { 
+			if(lastJobToIO.getIoCount() == 0) { 
 				if(lastJobToIO.isTerminated()) { 
 					freeSpaceTable.addSpace(lastJobToIO); 
 					jobTable.removeJob(lastJobToIO); 
 				} else if (lastJobToIO.isBlocked()) { 
 					lastJobToIO.unblockJob(); 
-					timesBlocked--; 
+					blockCount--;
 					readyQueue.add(lastJobToIO); 
 				} else { 
 					readyQueue.add(lastJobToIO); 
@@ -122,7 +125,7 @@ public class os{
 	public static void Tro  (int[] a, int[] p) {
 		lastRunningJobPCB.calculateTimeProcessed(p[5]); 
 
-		if(lastRunningJobPCB.getCpuTimeUsed >= lastRunningJobPCB.getMaxCpuTime()) { 
+		if(lastRunningJobPCB.getCpuTimeUsed() >= lastRunningJobPCB.getMaxCpuTime()) { 
 			if(lastRunningJobPCB.getIoCount() > 0) { 
 				lastRunningJobPCB.terminateJob(); 
 			} else { 
@@ -156,7 +159,7 @@ public class os{
 				jobTable.removeJob(lastRunningJobPCB);
 			} 
 		} else if(a[0] == 6) { 
-			lastRunningJobPCB.incrementIoCount(); 
+			lastRunningJobPCB.incIoCount(); 
 			ioQueue.add(lastRunningJobPCB); 
 			ioManager(); 
 		} else if(a[0] == 7) { 
@@ -165,7 +168,7 @@ public class os{
 				lastRunningJobPCB.blockJob(); 
 				
 				blockCount++; 
-				if(blockcount > BLOCKTHRESHOLD && !lastRunningJobPCB.isLatched()) { 
+				if(blockCount > BLOCKTHRESHOLD && !lastRunningJobPCB.isLatched()) { 
 					memoryToDrumQueue.add(lastRunningJobPCB); 
 					Swapper(); 
 				}//end if 
@@ -184,7 +187,7 @@ public class os{
 				doingIO = true; 
 				currentRunningJob.latchJob(); 
 
-				sos.siodisk(currentRunningJob.getJob());
+				sos.siodisk(currentRunningJob.getPID());
 				break; 
 			}//end for 
 		}//end if   
