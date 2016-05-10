@@ -63,7 +63,7 @@ public class os{
 		
 		if(lastRunningJobPCB != null) {
 			lastRunningJobPCB.calculateTimeProcessed(p[5]); 
-			readyQueue.addJob(lastRunningJobPCB);
+			readyQueue.add(lastRunningJobPCB);
 		}
 		
 		//lastJobToIo is a variable I created unsure if another needs to be used. 
@@ -78,9 +78,9 @@ public class os{
 				} else if (lastJobToIO.isBlocked()) { 
 					lastJobToIO.unblockJob(); 
 					timesBlocked--; 
-					readyQueue.addJob(lastJobToIO); 
+					readyQueue.add(lastJobToIO); 
 				} else { 
-					readyQueue.addJob(lastJobToIO); 
+					readyQueue.add(lastJobToIO); 
 				}//end else if
 			}//end if  
 		}//end if 
@@ -111,7 +111,7 @@ public class os{
 			//currentRunningJob.removeInCore();
 			freeSpaceTable.addSpace(currentRunningJob);  
 			drumToMemoryQueue.add(currentRunningJob);		 
-			memoryToDrumQueue.removeJob(currentRunningJob); 
+			memoryToDrumQueue.remove(currentRunningJob); 
 		}//end if else 
 
 		Swapper(); 
@@ -145,8 +145,8 @@ public class os{
 		readyQueue.add(lastRunningJobPCB); 
 
 		if(a[0] == 5)  {
-			while(readyQueue.contains(lastRunningJobPCB)) {readyQueue.removeJob(lastRunningJobPCB);} 
-			while(drumToMemoryQueue.contains(lastRunningJobPCB)) {memoryToDrumQueue.removeJob(lastRunningJobPCB);} 
+			while(readyQueue.contains(lastRunningJobPCB)) {readyQueue.remove(lastRunningJobPCB);} 
+			while(drumToMemoryQueue.contains(lastRunningJobPCB)) {memoryToDrumQueue.remove(lastRunningJobPCB);} 
 			
 			if(lastRunningJobPCB.getIoCount() > 0) { 
 				lastRunningJobPCB.terminateJob(); 
@@ -161,7 +161,7 @@ public class os{
 			ioManager(); 
 		} else if(a[0] == 7) { 
 			if(lastRunningJobPCB.getIoCount() != 0) { 
-				readyQueue.removeJob(lastRunningJobPCB); 
+				readyQueue.remove(lastRunningJobPCB); 
 				lastRunningJobPCB.blockJob(); 
 				
 				blockCount++; 
