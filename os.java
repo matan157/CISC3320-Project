@@ -33,9 +33,11 @@ public class os{
 		currentRunningJob = null;
 		lastRunningJobPCB = null;
 		lastJobToDrum = null;
-		lastJobToIO = null; 
+		lastJobToIO = null;
+	        doingIO = false; 	
 	       	swap = false;
 		blockCount = 0;
+		sos.offtrace();
 	}
 	
 	 
@@ -104,14 +106,14 @@ public class os{
 		currentRunningJob = lastJobToDrum; 
 
 		if(!currentRunningJob.isInCore()) { 
-			//currentRunningJob.putInCore(); 
+			currentRunningJob.putInCore(); // ALERT: Find putInCore tantamount.  
 			readyQueue.add(currentRunningJob); 
 			
 			for(int i = 0; i < currentRunningJob.getIoCount(); i++) { 
 				ioQueue.add(currentRunningJob); 
 			}//end for
 		} else { 
-			//currentRunningJob.removeInCore();
+			currentRunningJob.removeInCore(); // AlERT: This as previously commented out.  
 			freeSpaceTable.addSpace(currentRunningJob);  
 			drumToMemoryQueue.add(currentRunningJob);		 
 			memoryToDrumQueue.remove(currentRunningJob); 
@@ -126,6 +128,7 @@ public class os{
 		lastRunningJobPCB.calculateTimeProcessed(p[5]); 
 
 		if(lastRunningJobPCB.getCpuTimeUsed() >= lastRunningJobPCB.getMaxCpuTime()) { 
+
 			if(lastRunningJobPCB.getIoCount() > 0) { 
 				lastRunningJobPCB.terminateJob(); 
 			} else { 
@@ -148,8 +151,11 @@ public class os{
 		readyQueue.add(lastRunningJobPCB); 
 
 		if(a[0] == 5)  {
-			while(readyQueue.contains(lastRunningJobPCB)) {readyQueue.remove(lastRunningJobPCB);} 
-			while(drumToMemoryQueue.contains(lastRunningJobPCB)) {memoryToDrumQueue.remove(lastRunningJobPCB);} 
+			while(readyQueue.contains(lastRunningJobPCB))
+				readyQueue.remove(lastRunningJobPCB); 
+
+			while(drumToMemoryQueue.contains(lastRunningJobPCB)) 
+				memoryToDrumQueue.remove(lastRunningJobPCB); 
 			
 			if(lastRunningJobPCB.getIoCount() > 0) { 
 				lastRunningJobPCB.terminateJob(); 
@@ -173,7 +179,9 @@ public class os{
 					Swapper(); 
 				}//end if 
 			}//end if
-		}//end if else  
+		}//end if else
+
+		CpuScheduler(a, p); // ALERT: Added	
 	}
 
 	//Invoked by intterupt handler to manage IO requests. 
@@ -266,7 +274,9 @@ public class os{
 				lowest = currentRunningJob.getJobSize();
 				lowestIndex = i;
 			}
+
 			currentRunningJob = readyQueue.get(i);
+
 			if( currentRunningJob != null && !currentRunningJob.isBlocked() && !currentRunningJob.isTerminated() && currentRunningJob.getJobSize() < lowest ){
 				lowestIndex = i; 
 				lowest = currentRunningJob.getJobSize();
@@ -276,9 +286,8 @@ public class os{
 		if( lowest > 0 ){
 			currentRunningJob = readyQueue.get(lowestIndex);
 			Dispatcher(a, p);
-			while(readyQueue.contains(currentRunningJob) ){
-				readyQueue.remove(currentRunningJob); //Hmm
-			}
+			while( readyQueue.contains(currentRunningJob) )
+				readyQueue.remove(currentRunningJob); 	
 			return;
 		}
 		// No jobs to run, therefore the CPU is idle. 

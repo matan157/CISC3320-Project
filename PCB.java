@@ -84,6 +84,9 @@ public class PCB {
 	public void unlatchJob() {
 		latched = false;
 	}
+	public void putInCore(){ // Added. 
+		inCore = true;
+	}
 	public void removeInCore() {
 		inCore = false;
 	}
