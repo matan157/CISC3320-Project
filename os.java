@@ -37,7 +37,7 @@ public class os{
 	        doingIO = false; 	
 	       	swap = false;
 		blockCount = 0;
-		sos.offtrace();
+		sos.ontrace();
 	}
 	
 	 
@@ -96,6 +96,7 @@ public class os{
 	
 	//Invoked when the drum swaps a job in or out of memory/after siodrum is invoked.  	
 	public static void Drmint (int[] a, int[] p) {
+
 		swap = false; 
 
 		if(lastRunningJobPCB != null) { 
@@ -147,34 +148,45 @@ public class os{
  	
 	//Invoked when a job requests a service. 	
 	public static void Svc (int[] a, int[] p) {
+
 		lastRunningJobPCB.calculateTimeProcessed(p[5]); 
 		readyQueue.add(lastRunningJobPCB); 
 
-		if(a[0] == 5)  {
+		// a(5) - Job is requesting termination. 
+		if(a[0] == 5) {
+
 			while(readyQueue.contains(lastRunningJobPCB))
 				readyQueue.remove(lastRunningJobPCB); 
 
-			while(drumToMemoryQueue.contains(lastRunningJobPCB)) 
+			while(memoryToDrumQueue.contains(lastRunningJobPCB))  
 				memoryToDrumQueue.remove(lastRunningJobPCB); 
 			
 			if(lastRunningJobPCB.getIoCount() > 0) { 
 				lastRunningJobPCB.terminateJob(); 
-			} else { 
+			} 
+			else { 
 				lastRunningJobPCB.removeInCore(); 
 				freeSpaceTable.addSpace(lastRunningJobPCB); 
 				jobTable.removeJob(lastRunningJobPCB);
 			} 
-		} else if(a[0] == 6) { 
+		// a(6) - Job is requesting another disk I/O operation. 
+		} else if(a[0] == 6) {
+
 			lastRunningJobPCB.incIoCount(); 
 			ioQueue.add(lastRunningJobPCB); 
-			ioManager(); 
-		} else if(a[0] == 7) { 
+			ioManager();
+
+		// a(7) - Job is requesting to be blocked until all pending I/O requests are completed. 
+		} else if(a[0] == 7) {
+
 			if(lastRunningJobPCB.getIoCount() != 0) { 
+
 				readyQueue.remove(lastRunningJobPCB); 
-				lastRunningJobPCB.blockJob(); 
-				
+				lastRunningJobPCB.blockJob(); 	
 				blockCount++; 
+
 				if(blockCount > BLOCKTHRESHOLD && !lastRunningJobPCB.isLatched()) { 
+
 					memoryToDrumQueue.add(lastRunningJobPCB); 
 					Swapper(); 
 				}//end if 
@@ -242,7 +254,9 @@ public class os{
 		// Swapping-Out step
 		if(!swap){
 			for( int i = 0; i < memoryToDrumQueue.size(); i++ ){
+
 				currentRunningJob = memoryToDrumQueue.get(i);
+
 				if(currentRunningJob != null && !memoryToDrumQueue.get(i).isLatched() && currentRunningJob.getCpuTimeLeft() > lowest ){
 					lowestIndex = i;
 					lowest = currentRunningJob.getCpuTimeLeft();
