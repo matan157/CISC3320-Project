@@ -37,7 +37,7 @@ public class os{
 	        doingIO = false; 	
 	       	swap = false;
 		blockCount = 0;
-		sos.ontrace();
+		sos.offtrace();
 	}
 	
 	 
@@ -106,9 +106,12 @@ public class os{
 
 		currentRunningJob = lastJobToDrum; 
 
-		if(!currentRunningJob.isInCore()) { 
-			currentRunningJob.putInCore(); // ALERT: Find putInCore tantamount.  
+		if(!currentRunningJob.isInCore()) {	
+			currentRunningJob.putInCore(); // ALERT: Find putInCore tantamount. 
+			System.out.println("================================================================");
+		        System.out.println("Job No: " + currentRunningJob.getPID() + " is in core: " + currentRunningJob.isInCore());	
 			readyQueue.add(currentRunningJob); 
+			System.out.println("================================================================");
 			
 			for(int i = 0; i < currentRunningJob.getIoCount(); i++) { 
 				ioQueue.add(currentRunningJob); 
@@ -306,7 +309,7 @@ public class os{
 		}
 		// No jobs to run, therefore the CPU is idle. 
 		lastRunningJobPCB = null;
-		a[0] = 1;
+		a[0] = 1; // No jobs to run, CPU waits until interrupt. Ignores p values. 
 	}
 	//TODO: More informed explanation.
 	// Called by the CpuScheduler(). 
