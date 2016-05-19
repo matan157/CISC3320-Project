@@ -101,7 +101,17 @@ public class os {
 		IOManager();
 		CpuScheduler(a, p);
 	}
-
+	/* Drmint() -- called after sos.siodrum() is called. 
+	 *
+	 * If the last job on the drum isn't in core it will be placed in core. Then 
+	 * it will run all of its' IO jobs. 
+	 *
+	 * If not, this means the job is already in core so it will be removed from memory, 
+	 * placed into the drum from the main memory queue. And it is removed from the 
+	 * main memory to drum queue. WHY? 
+	 *
+	 * Subsequent calls to Swapper() and CpuScheduler() are then made. 
+	 */
 	public static void Drmint(int a[], int p[]) {
 		doingSwap = false;
 
@@ -129,7 +139,16 @@ public class os {
 		Swapper();
 		CpuScheduler(a, p);
 	}
-
+	/* Tro() -- Invoked when "running job has run out of time."
+	 * If the job has used up its maximum time allocation or its time slice.  
+	 *
+	 * 	- Checks the io count, and if the counter is > 0 the job is terminated. 
+	 * 	- If not, it will be removed from memory and the job table. 
+	 * 	Subsequent calls to Swapper() & IOManager() are called to handle job. 
+	 *
+	 * If the first condition doesn't fall through, then the job is added to the ready 
+	 * queue and the job is scheduled. 
+	 */
 	public static void Tro(int a[], int p[]) {
 		lastRunningJob.calculateTimeProcessed(p[5]);
 
@@ -254,12 +273,16 @@ public class os {
 			}
 		}
 	}
-
+	/* CpuScheduler() -- Invoked from other interrupt handlers to select order of jobs to run.
+	 * The scheduler accesses the smallest unblocked job by index. If such a job exists, it will 
+	 * be dispatched(). 
+	 */  	
 	public static void CpuScheduler(int a[], int p[]) {
 		int lowest = 0;
 		int lowestIndex = 0;
 
 		for(int i = 0; i < readyQueue.size(); i++) {
+			// Finds smallest job out of unblocked jobs.  
 			if(lowest == 0 && !readyQueue.get(i).isBlocked()) {
 				currentJob = readyQueue.get(i);
 				lowest = currentJob.getJobSize();
@@ -267,7 +290,7 @@ public class os {
 			}
 
 			currentJob = readyQueue.get(i);
-
+			// If every job is blocked, null, terminated, then it means that there is no process to run. 
 			if(currentJob != null && !currentJob.isBlocked() && !currentJob.isTerminated() && currentJob.getJobSize() < lowest) {
 				lowestIndex = i;
 				lowest = currentJob.getJobSize();
@@ -281,15 +304,21 @@ public class os {
 				readyQueue.remove(currentJob);
 			return;
 		}
-
+		//a[0]= 1, "There are no jobs ready to run".
 		lastRunningJob = null;
 		a[0] = 1;
 	}
-
+	/* Dispatcher() -- "Sets CPU registers before context switches". 
+	 * After taking in the address, and jobsize, this will run the 
+	 * current job. Either the job will be run for the duration of 
+	 * the round robin slice, or for the remainder of how much the 
+	 * job has left. 
+	 */
 	public static void Dispatcher(int a[], int p[]) {
 		lastRunningJob = currentJob;
 		lastRunningJob.setLastTimeProcessing(p[5]);
-
+		
+		// a[0]= 2, "Set CPU to run mode, must set p values". Specifically, p[2,3,4]. 
 		a[0] = 2;
 		p[2] = lastRunningJob.getAddress();
 		p[3] = lastRunningJob.getJobSize();
