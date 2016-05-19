@@ -16,7 +16,7 @@ public class os{
 	private static JobTable jobTable; 
 	private static FreeSpaceTable freeSpaceTable;
 	private static PCB currentRunningJob, lastRunningJobPCB, lastJobToDrum, lastJobToIO;
-	private static final int ROUNDROBINSLICE = 9; 
+	private static final int ROUNDROBINSLICE = 10; 
 	private static final int BLOCKTHRESHOLD = 1;
 	private static int blockCount;
 	private static boolean swap, doingIO; // For the swapper() function and Dskint() respectively.
@@ -25,7 +25,7 @@ public class os{
 	private static List<PCB> memoryToDrumQueue = new ArrayList<PCB>();
 	private static List<PCB> ioQueue = new ArrayList<PCB>();
 
-	// Initialize variables to be used here! Initialize more objects as you go! 
+	/* SOS starts by calling startup(), all variables to be used are initialized here.  */	
 	public static void startup() {
 		
 		jobTable = new JobTable(50); // Limit = 50. 
@@ -37,7 +37,7 @@ public class os{
 	        doingIO = false; 	
 	       	swap = false;
 		blockCount = 0;
-		sos.offtrace();
+		sos.ontrace();
 	}
 	
 	 
@@ -47,7 +47,7 @@ public class os{
 	  */
 	 
 	
-	// Invoked when a new job has entered the system and is on the drum. 
+	// Invoked when a new job has entered the system. 
 	public static void Crint (int[] a, int[] p) {
 
 		if( lastRunningJobPCB != null ){
@@ -106,21 +106,22 @@ public class os{
 
 		currentRunningJob = lastJobToDrum; 
 
+
 		if(!currentRunningJob.isInCore()) {	
 			currentRunningJob.putInCore(); // ALERT: Find putInCore tantamount. 
-			System.out.println("================================================================");
-		        System.out.println("Job No: " + currentRunningJob.getPID() + " is in core: " + currentRunningJob.isInCore());	
 			readyQueue.add(currentRunningJob); 
-			System.out.println("================================================================");
-			
+				
 			for(int i = 0; i < currentRunningJob.getIoCount(); i++) { 
-				ioQueue.add(currentRunningJob); 
+				ioQueue.add(currentRunningJob);
 			}//end for
-		} else { 
+
+		} 
+		else { 
 			currentRunningJob.removeInCore(); // AlERT: This as previously commented out.  
 			freeSpaceTable.addSpace(currentRunningJob);  
 			drumToMemoryQueue.add(currentRunningJob);		 
 			memoryToDrumQueue.remove(currentRunningJob); 
+
 		}//end if else 
 
 		Swapper(); 
@@ -149,7 +150,10 @@ public class os{
 		CpuScheduler(a, p); 
 	}
  	
-	//Invoked when a job requests a service. 	
+	/* Supervisor Call Interrupt -- SVC
+	 * Invoked when the executing job needs service and has just executed a 
+	 * software interrupt service.
+	 */  	
 	public static void Svc (int[] a, int[] p) {
 
 		lastRunningJobPCB.calculateTimeProcessed(p[5]); 
@@ -174,10 +178,12 @@ public class os{
 			} 
 		// a(6) - Job is requesting another disk I/O operation. 
 		} else if(a[0] == 6) {
-
+			
 			lastRunningJobPCB.incIoCount(); 
 			ioQueue.add(lastRunningJobPCB); 
+			lastRunningJobPCB.printJob(); // --stub field 
 			ioManager();
+			lastRunningJobPCB.printJob(); // --stub field 
 
 		// a(7) - Job is requesting to be blocked until all pending I/O requests are completed. 
 		} else if(a[0] == 7) {
@@ -196,11 +202,12 @@ public class os{
 			}//end if
 		}//end if else
 
-		CpuScheduler(a, p); // ALERT: Added	
+		CpuScheduler(a, p); 	
 	}
 
 	//Invoked by intterupt handler to manage IO requests. 
 	public static void ioManager() { 
+
 		if(ioQueue.size() != 0 && !doingIO) { 
 			for(int i = 0; i < ioQueue.size(); i++) { 
 				currentRunningJob = ioQueue.get(i); 
@@ -266,6 +273,7 @@ public class os{
 				}
 			}
 			if( lowest > 0 ){
+
 				swap = true;
 				currentRunningJob = memoryToDrumQueue.get(lowestIndex);
 				sos.siodrum(currentRunningJob.getPID(), currentRunningJob.getJobSize(), currentRunningJob.getAddress(), 1);
@@ -275,6 +283,7 @@ public class os{
 				// First occurance of ioQueue!
 				ioQueue.remove(lastJobToDrum);
 				memoryToDrumQueue.remove(lastJobToDrum);
+
 			}
 		}
 	}
@@ -307,17 +316,21 @@ public class os{
 				readyQueue.remove(currentRunningJob); 	
 			return;
 		}
-		// No jobs to run, therefore the CPU is idle. 
-		lastRunningJobPCB = null;
-		a[0] = 1; // No jobs to run, CPU waits until interrupt. Ignores p values. 
+
+		// a[0]= 1, There are no jobs to run, CPU will wait until interupt. Ignore p values. 	
+		lastRunningJobPCB = null;	
+		a[0] = 1; 
 	}
 	//TODO: More informed explanation.
-	// Called by the CpuScheduler(). 
+	// Called by the CpuScheduler() 
 	public static void Dispatcher(int a[], int p[]){
 		lastRunningJobPCB = currentRunningJob; 
 		lastRunningJobPCB.setLastTimeProcessing(p[5]);
 		
-		// First use of Round Robin, with time slice set to 9. 
+		// a[0]= 2, means that CPU is set to run mode. p[1], [5], are ignored. 
+		// p[2]= The base address of job to be run. 
+		// p[3]= the size (in k) of job to be run. 
+		// p[4]= time slice (time quantum). 	
 		if(lastRunningJobPCB.getCpuTimeLeft() > ROUNDROBINSLICE){
 			a[0] = 2; 
 			p[2] = lastRunningJobPCB.getAddress();

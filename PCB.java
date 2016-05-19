@@ -94,5 +94,15 @@ public class PCB {
 		terminated = true;
 	}
 
-	// TODO add print method
+	/* Stub Field: printJob()
+	 * This will be used to print job information at specific points in the program. 
+	 * Feel free to add any other variables that you may want to pay attention to because 
+	 * this is heavily utilizied. 
+	 */ 	
+	public void printJob() { 
+		System.out.println("\n===============================================");
+		System.out.println("JOB_NUM: " + PID + " PRTY: " + priority + " SIZE: " + jobSize + " MAX_TIME: " + maxCpuTime + " CURR_TIME: " + cpuTimeUsed ); 
+		System.out.println("IN_CORE: " + inCore + " LATCH: " + latched  + " IO_PENDING: " + ioPending );
+		System.out.println("===============================================\n");
+	}
 }
