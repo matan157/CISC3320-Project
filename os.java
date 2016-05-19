@@ -169,6 +169,23 @@ public class os {
 		CpuScheduler(a, p);
 	}
 
+	/*This function is invoked when a running job wants a service. The job can request termination, request disk I/O, or 
+	  request to be blocked. The time in which the job makes a request is calculated and the job is added to the readyQueue. 
+	  aInt acts a int holder for the value a[0]. 
+		aInt = 5: (Request termination.)
+			Remove the job from the readyQueue and mainToDrumQueue.
+			Check the IO count, if greater than 0 and terminate the job, 
+			else remove the job from memory if IO count is 0, update the 
+			freeSpaceTable and jobTable accordingly.  
+		aInt = 6: (Request disk I/O.) 
+			Increment the jobs IO counter and add the job to the ioQueue.
+			Call IOManager to deal with the request.  
+		aInt = 7: (Request to be blocked.)
+			Check to see if IO count is not 0, if 0 remove job from readyQueue, 
+			block the job and increment blockCount. If blockCount is greater than
+			BLOCKTHRESHOLD and the job is not latched, add the job to mainToDrumQueue
+			and call Swapper();  
+	*/
 	public static void Svc(int a[], int p[]) {
 		lastRunningJob.calculateTimeProcessed(p[5]);
 		readyQueue.add(lastRunningJob);
@@ -209,6 +226,10 @@ public class os {
 		CpuScheduler(a, p);
 	}
 
+	/*This function is responsible for managing IO requests. 
+		If not currentlyDoingIO and the ioQueue is not empty, currentJob is removed from the ioQueue, 
+		currentlyDoingIO is set to true and the job is latched. Lastly siodisk is called on currentJob.  
+	*/
 	public static void IOManager() {
 		if(!currentlyDoingIo && ioQueue.size() != 0) {
 			for(int i = 0; i < ioQueue.size(); i++) {
@@ -224,12 +245,24 @@ public class os {
 			}
 		}
 	}
-
+	
+	/*This function is inovked in accordance with Crint() when a new job needs to be added to memory. 
+		The new job is added to the drumToMainQueue and swapper is invoked. 
+	*/
 	public static void MemoryManager(PCB pcb) {
 		drumToMainQueue.add(pcb);
 		Swapper();
 	}
+	
+	/*This function is responsible for determining whichever job is currently not in memory should be placed in memory (long-term scheduler). 
+		It finds space in memory using *best fit method. Once space is found, OS must call siodrum() to swap the job in. If needed the
+		swaps jobs out to make room for ones want to be swapped in. 
 
+		Swap in: Examine every job on the drumToMainQueue. currentJob is placed into memory if space is available. 
+			 siodrum is called and the job is removed from memory.  
+		Swap out: Examine every job on the mainToDrumQueue. If currentJob is not null, is not latched, and has the 
+			 the most amount of CPU time left call siodrum on that job. Then remove the job from all three queues.  
+	*/
 	public static void Swapper() {
 		int tempAddress;
 		int lowest = 0;
