@@ -1,12 +1,6 @@
-/*/
-	PCB Class is a Process Control Block for jobs
-	It contains all the information possibly needed.
-	Maybe even more.
-/*/
 public class PCB {
-    
-    // State constants
-    private static int PID; // Process ID
+
+	private int PID;
 	private int jobSize;
 	private int timeArrived;
 	private int lastTimeProcessing;
@@ -20,10 +14,7 @@ public class PCB {
 	private boolean latched;
 	private boolean inCore;
 	private boolean terminated;
-	 
-	// Constructor   
-	// When the job is created it is not latched, incore, or blocked.
-	// It has no address until it's put into memory
+
 	public PCB(int PID, int priority, int jobSize, int maxCpuTime, int timeArrived) {
 		this.PID = PID;
 		this.priority = priority;
@@ -32,20 +23,20 @@ public class PCB {
 		this.timeArrived = timeArrived;
 		cpuTimeUsed = 0;
 		ioPending = 0;
-		blocked = false; 
+		blocked = false;
 		latched = false;
 		inCore = false;
 		terminated = false;
 		timesBlocked = 0;
 		address = -1;
 	}
-	
-	// GETTERS 
-	public int getPID() { return PID; } 
-	public int getTimesBlocked() { return timesBlocked; }
-	public int getTimeArrived() { return timeArrived; }
+
+	// Accessors
+	public int getPID() { return PID; }
 	public int getJobSize() { return jobSize; }
 	public int getAddress() { return address; }
+	public int getTimesBlocked() { return timesBlocked; }
+	public int getTimeArrived() { return timeArrived; }
 	public int getMaxCpuTime() { return maxCpuTime; }
 	public int getIoCount() { return ioPending; }
 	public int getCpuTimeUsed() { return cpuTimeUsed; }
@@ -53,56 +44,31 @@ public class PCB {
 	public int getPriority() { return priority; }
 	public boolean isBlocked() { return blocked; }
 	public boolean isInCore() { return inCore; }
-	public boolean isTerminated() { return terminated; }
 	public boolean isLatched() { return latched; }
-    
-	// SETTERS
-	public void setAddress(int address) {
-		this.address = address; 
-	}
-	
+	public boolean isTerminated() { return terminated; }
+
+	// Mutators
+	public void setAddress(int address) { this.address = address; }
 	public void setLastTimeProcessing(int lastTimeProcessing) {
-		this.lastTimeProcessing = lastTimeProcessing;
+		this.lastTimeProcessing = lastTimeProcessing; 
 	}
-	// How much time it has been processed
 	public void calculateTimeProcessed(int currentTime) {
-		cpuTimeUsed += currentTime - lastTimeProcessing;
-	}
-	// Increment and Decrement
-	public void incTimeBlocked() { timesBlocked++; }
-	public void incIoCount() { ioPending++; }
-	public void decIoCount() { ioPending--; }
-	public void blockJob() {
-		blocked = true;
-	}
-	public void unblockJob() {
-		blocked = false;
-	}
-	public void latchJob() {
-		latched = true;
-	}
-	public void unlatchJob() {
-		latched = false;
-	}
-	public void putInCore(){ // Added. 
-		inCore = true;
-	}
-	public void removeInCore() {
-		inCore = false;
-	}
-	public void terminateJob() {
-		terminated = true;
+		cpuTimeUsed = cpuTimeUsed + currentTime - lastTimeProcessing; 
 	}
 
-	/* Stub Field: printJob()
-	 * This will be used to print job information at specific points in the program. 
-	 * Feel free to add any other variables that you may want to pay attention to because 
-	 * this is heavily utilizied. 
-	 */ 	
-	public void printJob() { 
-		System.out.println("\n===============================================");
-		System.out.println("JOB_NUM: " + PID + " PRTY: " + priority + " SIZE: " + jobSize + " MAX_TIME: " + maxCpuTime + " CURR_TIME: " + cpuTimeUsed ); 
-		System.out.println("IN_CORE: " + inCore + " LATCH: " + latched  + " IO_PENDING: " + ioPending );
-		System.out.println("===============================================\n");
+	public void incTimesBlocked() { timesBlocked++; }
+	public void incIoCount() { ioPending++; }
+	public void decIoCount() { ioPending--; }
+	public void blockJob() { blocked = true; }
+	public void unblockJob() { blocked = false; }
+	public void latchJob() { latched = true; }
+	public void unlatchJob() { latched = false; }
+	public void putInCore() { inCore = true; }
+	public void removeInCore() { inCore = false; }
+	public void terminateJob() { terminated = true; }
+
+	public void printProcess() {
+		System.out.println("PCB stuff");
+	//	System.out.println(PID + " " + jobSize + " " + timeArrived + " " cpuTimeUsed + " " + maxCpuTime + " " + ioPending + " " + priority + " " + blocked + " " + latched + " " + inCore + " " + terminated + " " + address + " " + timesBlocked);
 	}
 }
