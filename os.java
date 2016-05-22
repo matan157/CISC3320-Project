@@ -4,7 +4,7 @@ import java.util.List;
 public class os {
 
 	private static JobTable jobTable;
-	private static FreeSpaceTable freeSpaceTable;
+	private static FST_2 freeSpaceTable;
 
 	private static List<PCB> readyQueue = new ArrayList<PCB>();
 	private static List<PCB> drumToMainQueue = new ArrayList<PCB>();
@@ -30,7 +30,7 @@ public class os {
 	// rad variables.
 	public static void startup() {
 		jobTable = new JobTable(MAX_NUM_JOBS);
-		freeSpaceTable = new FreeSpaceTable(MEMORY_SIZE);
+		freeSpaceTable = new FST_2();
 
 		lastRunningJob = null;
 		lastJobToIo = null;
@@ -42,7 +42,7 @@ public class os {
 
 		blockCount = 0;
 
-		sos.offtrace();
+		sos.ontrace();
 	}
 
 	// Crint is called when a new job arrives on the drum.
@@ -63,6 +63,7 @@ public class os {
 
 		jobTable.addJob(currentJob);
 		MemoryManager(currentJob);
+		freeSpaceTable.printFST();
 		CpuScheduler(a, p);
 	}
 
@@ -97,7 +98,7 @@ public class os {
 				
 			}
 		}
-
+		freeSpaceTable.printFST();
 		IOManager();
 		CpuScheduler(a, p);
 	}
@@ -137,6 +138,7 @@ public class os {
 		}
 
 		Swapper();
+		freeSpaceTable.printFST();
 		CpuScheduler(a, p);
 	}
 	/* Tro() -- Invoked when "running job has run out of time."
