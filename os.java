@@ -42,7 +42,7 @@ public class os {
 
 		blockCount = 0;
 
-		sos.ontrace();
+		sos.offtrace();
 	}
 
 	// Crint is called when a new job arrives on the drum.

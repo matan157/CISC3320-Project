@@ -22,6 +22,8 @@ public class FST_2 {
             if(chunkSize >= jobSize) {
                 fs.setAddress(chunkAddress + jobSize);
                 fs.setSize(chunkSize - jobSize);
+                if(fs.getSize() == 0)
+                    FreeSpaceTable.remove(fs);
                 job.setAddress(chunkAddress);
                 return chunkAddress;
             }
