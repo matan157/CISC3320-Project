@@ -369,14 +369,19 @@ public class os {
 	 * be dispatched(). 
 	 */  	
 	public static void CpuScheduler(int a[], int p[]) {
+		//Intialize two local variables to keep track of lowest job size and the index of that job. 
 		int lowest = 0;
 		int lowestIndex = 0;
 
+		//Search the readyQueue for the job. 
 		for(int i = 0; i < readyQueue.size(); i++) {
 			// Finds smallest job out of unblocked jobs.  
 			if(lowest == 0 && !readyQueue.get(i).isBlocked()) {
+				//Get the currentJob from the readyQueue 
 				currentJob = readyQueue.get(i);
+				//Set lowest to currentJob Size 
 				lowest = currentJob.getJobSize();
+				//Set the lowestIndex to the iterator
 				lowestIndex = i;
 			}
 
@@ -388,9 +393,13 @@ public class os {
 			}
 		}
 
+		//If lowest is greater than 0
 		if(lowest > 0) {
+			//Get the lowest index of the job from the readyQueue
 			currentJob = readyQueue.get(lowestIndex);
+			//Call the dispatcher 
 			Dispatcher(a, p);
+			//While the readyQueue contains the current job remove it 
 			while(readyQueue.contains(currentJob))
 				readyQueue.remove(currentJob);
 			return;
@@ -406,14 +415,19 @@ public class os {
 	 * job has left. 
 	 */
 	public static void Dispatcher(int a[], int p[]) {
+		//Set last running job to currentJob 
 		lastRunningJob = currentJob;
+		//Set the last time the job was running
 		lastRunningJob.setLastTimeProcessing(p[5]);
 		
 		// a[0]= 2, "Set CPU to run mode, must set p values". Specifically, p[2,3,4]. 
 		a[0] = 2;
+		//Get the address of job 
 		p[2] = lastRunningJob.getAddress();
+		//Get the size of the job 
 		p[3] = lastRunningJob.getJobSize();
 
+		//Don't let the job run more than the CPU time it has left
 		if(lastRunningJob.getCpuTimeLeft() > ROUNDROBINSLICE) {
 			p[4] = ROUNDROBINSLICE;
 		} else {
