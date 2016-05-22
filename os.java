@@ -119,41 +119,55 @@ public class os {
 	/* Drmint() -- called after sos.siodrum() is called. 
 	 *
 	 * If the last job on the drum isn't in core it will be placed in core. Then 
-	 * it will run all of its' IO jobs. 
+	 * it will run all of its IO jobs. 
 	 *
 	 * If not, this means the job is already in core so it will be removed from memory, 
 	 * placed into the drum from the main memory queue. And it is removed from the 
-	 * main memory to drum queue. WHY? 
+	 * main memory to drum queue. 
 	 *
 	 * Subsequent calls to Swapper() and CpuScheduler() are then made. 
 	 */
 	public static void Drmint(int a[], int p[]) {
 		doingSwap = false;
 
+		// If there was a job running
 		if(lastRunningJob != null) {
+			// Calculate how much it was running
 			lastRunningJob.calculateTimeProcessed(p[5]);
+			// Add it to the ready queue
 			readyQueue.add(lastRunningJob);
 		}
 
+		// Working with the last job to drum
 		currentJob = lastJobToDrum;
-
+		
+		// If the job isn't in core
 		if(!currentJob.isInCore()) {
+			// Put it in the core
 			currentJob.putInCore();
+			// Add it to the ready queue
 			readyQueue.add(currentJob);
 
 			for(int i = 0; i < currentJob.getIoCount(); i++) {
+				// Put it on the ioQueue for how many times it needs IO
 				ioQueue.add(currentJob);
 			}
+		// If it's already in core
 		} else {
+			// Remove it from the core
 			currentJob.removeInCore();
+			// Remove it from memory
 			freeSpaceTable.addSpace(currentJob);
+			// add to the drumToMain queue
 			drumToMainQueue.add(currentJob);
+			// remove it from drum queue
 			mainToDrumQueue.remove(currentJob);
 		}
 
-		Swapper();
-		freeSpaceTable.printFST();
-		CpuScheduler(a, p);
+		Swapper(); // Make all swaps
+		
+		// freeSpaceTable.printFST();
+		CpuScheduler(a, p);// Schedule it
 	}
 	/* Tro() -- Invoked when "running job has run out of time."
 	 * If the job has used up its maximum time allocation or its time slice.  
@@ -166,22 +180,31 @@ public class os {
 	 * queue and the job is scheduled. 
 	 */
 	public static void Tro(int a[], int p[]) {
+		// See how much it ran for
 		lastRunningJob.calculateTimeProcessed(p[5]);
 
+		// If the amount of CPU time it used is over the allowed time
 		if(lastRunningJob.getCpuTimeUsed() >= lastRunningJob.getMaxCpuTime()) {
+			// If it has no IO pending
 			if(lastRunningJob.getIoCount() > 0) {
+				// Terminate it
 				lastRunningJob.terminateJob();
+			// If it can still has IO
 			} else {
+				// Free up some space
 				freeSpaceTable.addSpace(lastRunningJob);
+				// Remove from the job table
 				jobTable.removeJob(lastRunningJob);
 			}
-
+			// Swap and manage IO
 			Swapper();
 			IOManager();
+		// If it can still run
 		} else {
+			// Put it on the ready queue
 			readyQueue.add(currentJob);
 		}
-
+		// Schedule
 		CpuScheduler(a, p);
 	}
 
@@ -208,18 +231,24 @@ public class os {
 
 		int aInt = a[0];
 
+		// Request termination
 		if(aInt == 5) {
+			// Remove it from the ready queue
 			while(readyQueue.contains(lastRunningJob))
 				readyQueue.remove(lastRunningJob);
-
+			// Remove it from the drum queue
 			while(mainToDrumQueue.contains(lastRunningJob))
 				mainToDrumQueue.remove(lastRunningJob);
-
+			// If it didn't do IO
 			if(lastRunningJob.getIoCount() > 0) {
 				lastRunningJob.terminateJob();
+			// If it did io
 			} else {
+				// Remove from core
 				lastRunningJob.removeInCore();
+				// Make space
 				freeSpaceTable.addSpace(lastRunningJob);
+				// Remove from job table
 				jobTable.removeJob(lastRunningJob);
 			}
 		} else if(aInt == 6) {
