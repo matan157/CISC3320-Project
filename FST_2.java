@@ -45,30 +45,34 @@ public class FST_2 {
 	// Save state of job address and its size. 
         int jobAddress = job.getAddress();
         int jobSize = job.getJobSize();
+        // Add a chunk for the job        
         FreeSpaceTable.add( new FreeSpace(jobAddress, jobSize)); 
         Collections.sort(FreeSpaceTable);
-
+        // Go through the FST and combine adjacent chunks
         for( FreeSpace fs1 : FreeSpaceTable ){
-
             for( FreeSpace fs2 : FreeSpaceTable ){
-
+                // Use local variables incase object data gets changed
                 int c1Address = fs1.getAddress(); 
                 int c1Size = fs1.getSize(); 
                 int c2Address = fs2.getAddress(); 
                 int c2Size = fs2.getSize();	
-
+                
+                // If chunks are adjacent, combine, and set for removal
                 if( c1Address + c1Size == c2Address){
                     fs1.setSize(c1Size + c2Size);
+                    // Set for removal  
                     fs2.setAddress(-1);
                 }				
             }
         }
+        
+        // Remove from the FST
         for(Iterator<FreeSpace> it = FreeSpaceTable.iterator(); it.hasNext();) {
             FreeSpace fs = it.next();
             if(fs.getAddress() == -1)
                 it.remove();
         }
-
+        // Sort for good measure
         Collections.sort(FreeSpaceTable);
         job.setAddress(-1);                
     } 
