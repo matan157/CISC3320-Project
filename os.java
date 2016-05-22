@@ -333,30 +333,46 @@ public class os {
 			 the most amount of CPU time left call siodrum on that job. Then remove the job from all three queues.  
 	*/
 	public static void Swapper() {
+
+		// Take on the temporary address. 
 		int tempAddress;
 		int lowest = 0;
 		int lowestIndex = 0;
 
-		// Swap in
+		// Swap in step. 
 		if(!doingSwap) {
 			for(int i = 0; i < drumToMainQueue.size(); i++) {
+				// currentJob is taking the job which came in from Memory Manager(). 
 				currentJob = drumToMainQueue.get(i);
+				// the temporary address will take in the current job and will
+				// hold the chunk address. 
 				tempAddress = freeSpaceTable.findSpaceForJob(currentJob);
+				// If space wasn't found, then a -1 is placed for current job. 
+				// Otherwise, the result will be anything within 100k from 0-99. 
 				if(currentJob.getAddress() >= 0) {
+					// set flag to true. 
 					doingSwap = true;
+					// write the info to siodrum()
 					sos.siodrum(currentJob.getPID(), currentJob.getJobSize(), currentJob.getAddress(), 0);
+					// set current job to lastJobToDrum because Drmint() may have to
+					// use this info. 
 					lastJobToDrum = currentJob;
+					// remove the current job from the backing store to main memory 
+					// queue. 
 					drumToMainQueue.remove(i);
 					break;
 				}
 			}
 		}
 
-		// Swap out
+		// Swap out step. 
 		if(!doingSwap) {
+			// While there exists jobs from main memory to backing store. 
 			for(int i = 0; i < mainToDrumQueue.size(); i++) {
+				// Update current job to take job currently the queue. 
 				currentJob = mainToDrumQueue.get(i);
-
+				// Ensure the job isn't null, the job from main memory to backingstore 
+				// isn't latched, and the current job is greater than the lowest.  
 				if(currentJob != null && !mainToDrumQueue.get(i).isLatched() && currentJob.getCpuTimeLeft() > lowest) {
 					lowestIndex = i;
 					lowest = currentJob.getCpuTimeLeft();
