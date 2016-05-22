@@ -293,22 +293,20 @@ public class os {
 		// If the job isn't doing IO, or this io queue size isn't empty then 
 		// then we must take action. 
 		if(!currentlyDoingIo && ioQueue.size() != 0) {
-			// For each io job in the queue, we add its 
-			// state to current job, remove it from the iOqueue 
-			// because it will be dealt with. From there, set 
-			// lastJobToIo to current job and set the doingIO flag 
-			// to true. Then the job is latched to prevent other jobs 
-			// from doing IO. Then the current job is sent to siodisk 
-			// for processing. Siodisk will take the job and its number 
-			// of the job whose I/O is to be done.  
+			
+		        // For each IO job in the queue ...	
 			for(int i = 0; i < ioQueue.size(); i++) {
+				// We add its state to current job, 
 				currentJob = ioQueue.get(i);
+				// removie it from the IOqueue because it will be handled. 
 				ioQueue.remove(i);
-
+				// LastJobToIo is set to current job.  
 				lastJobToIo = currentJob;
+				// Set the doingIO flag to true. 
 				currentlyDoingIo = true;
+				// The job is latched to prevent other jobs from from doing IO. 
 				currentJob.latchJob();
-
+				// Siodisk will take the job and its PID so its number of the job whose I/O is to be done. 
 				sos.siodisk(currentJob.getPID());
 				break;
 			}
