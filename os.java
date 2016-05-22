@@ -293,22 +293,20 @@ public class os {
 		// If the job isn't doing IO, or this io queue size isn't empty then 
 		// then we must take action. 
 		if(!currentlyDoingIo && ioQueue.size() != 0) {
-			// For each io job in the queue, we add its 
-			// state to current job, remove it from the iOqueue 
-			// because it will be dealt with. From there, set 
-			// lastJobToIo to current job and set the doingIO flag 
-			// to true. Then the job is latched to prevent other jobs 
-			// from doing IO. Then the current job is sent to siodisk 
-			// for processing. Siodisk will take the job and its number 
-			// of the job whose I/O is to be done.  
+			
+		        // For each IO job in the queue ...	
 			for(int i = 0; i < ioQueue.size(); i++) {
+				// We add its state to current job, 
 				currentJob = ioQueue.get(i);
+				// removie it from the IOqueue because it will be handled. 
 				ioQueue.remove(i);
-
+				// LastJobToIo is set to current job.  
 				lastJobToIo = currentJob;
+				// Set the doingIO flag to true. 
 				currentlyDoingIo = true;
+				// The job is latched to prevent other jobs from from doing IO. 
 				currentJob.latchJob();
-
+				// Siodisk will take the job and its PID so its number of the job whose I/O is to be done. 
 				sos.siodisk(currentJob.getPID());
 				break;
 			}
@@ -382,14 +380,19 @@ public class os {
 	 * be dispatched(). 
 	 */  	
 	public static void CpuScheduler(int a[], int p[]) {
+		//Intialize two local variables to keep track of lowest job size and the index of that job. 
 		int lowest = 0;
 		int lowestIndex = 0;
 
+		//Search the readyQueue for the job. 
 		for(int i = 0; i < readyQueue.size(); i++) {
 			// Finds smallest job out of unblocked jobs.  
 			if(lowest == 0 && !readyQueue.get(i).isBlocked()) {
+				//Get the currentJob from the readyQueue 
 				currentJob = readyQueue.get(i);
+				//Set lowest to currentJob Size 
 				lowest = currentJob.getJobSize();
+				//Set the lowestIndex to the iterator
 				lowestIndex = i;
 			}
 
@@ -401,9 +404,13 @@ public class os {
 			}
 		}
 
+		//If lowest is greater than 0
 		if(lowest > 0) {
+			//Get the lowest index of the job from the readyQueue
 			currentJob = readyQueue.get(lowestIndex);
+			//Call the dispatcher 
 			Dispatcher(a, p);
+			//While the readyQueue contains the current job remove it 
 			while(readyQueue.contains(currentJob))
 				readyQueue.remove(currentJob);
 			return;
@@ -419,14 +426,19 @@ public class os {
 	 * job has left. 
 	 */
 	public static void Dispatcher(int a[], int p[]) {
+		//Set last running job to currentJob 
 		lastRunningJob = currentJob;
+		//Set the last time the job was running
 		lastRunningJob.setLastTimeProcessing(p[5]);
 		
 		// a[0]= 2, "Set CPU to run mode, must set p values". Specifically, p[2,3,4]. 
 		a[0] = 2;
+		//Get the address of job 
 		p[2] = lastRunningJob.getAddress();
+		//Get the size of the job 
 		p[3] = lastRunningJob.getJobSize();
 
+		//Don't let the job run more than the CPU time it has left
 		if(lastRunningJob.getCpuTimeLeft() > ROUNDROBINSLICE) {
 			p[4] = ROUNDROBINSLICE;
 		} else {
