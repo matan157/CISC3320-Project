@@ -77,22 +77,32 @@ public class os {
 	 *		Its IO count is decremented
 	*/
 	public static void Dskint(int a[], int p[]) {
-		currentlyDoingIo = false;
+		currentlyDoingIo = false; // Just finished IO
 
 		if(lastRunningJob != null) {
+			// Figure out how much it's been running
 			lastRunningJob.calculateTimeProcessed(p[5]);
+			// Put the last job on the readyQueue
 			readyQueue.add(lastRunningJob);
 		}
 
+		// If the last job that did IO is on the job table
 		if(jobTable.contains(lastJobToIo.getPID())) {
+			// Decrement the IoPending count, it just did IO
 			lastJobToIo.decIoCount();
+			// Unlatch
 			lastJobToIo.unlatchJob();
 
+			// If the job doesn't need to do IO anymore
 			if(lastJobToIo.getIoCount() == 0) {
+				// And it is going to terminate
 				if(lastJobToIo.isTerminated()) {
+					// Remove from the job table and free up space
 					freeSpaceTable.addSpace(lastJobToIo);
 					jobTable.removeJob(lastJobToIo);
+				// If it's blocked
 				} else if(lastJobToIo.isBlocked()) {
+					// Unblock it and add it to the ready queue.
 					lastJobToIo.unblockJob();
 					blockCount--;
 					readyQueue.add(lastJobToIo);
@@ -102,9 +112,9 @@ public class os {
 				
 			}
 		}
-		freeSpaceTable.printFST();
-		IOManager();
-		CpuScheduler(a, p);
+		//freeSpaceTable.printFST();
+		IOManager(); // Manage your IO
+		CpuScheduler(a, p); // Schedule
 	}
 	/* Drmint() -- called after sos.siodrum() is called. 
 	 *
