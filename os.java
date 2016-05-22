@@ -319,7 +319,9 @@ public class os {
 		The new job is added to the drumToMainQueue and swapper is invoked. 
 	*/
 	public static void MemoryManager(PCB pcb) {
+		// Job wants to be in main memory
 		drumToMainQueue.add(pcb);
+		// Let the swapper figure things out		
 		Swapper();
 	}
 	
