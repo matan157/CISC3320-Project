@@ -287,17 +287,26 @@ public class os {
 	/*This function is responsible for managing IO requests. 
 		If not currentlyDoingIO and the ioQueue is not empty, currentJob is removed from the ioQueue, 
 		currentlyDoingIO is set to true and the job is latched. Lastly siodisk is called on currentJob.  
+		This is done because siodisk 
 	*/
 	public static void IOManager() {
+		// If the job isn't doing IO, or this io queue size isn't empty then 
+		// then we must take action. 
 		if(!currentlyDoingIo && ioQueue.size() != 0) {
+			
+		        // For each IO job in the queue ...	
 			for(int i = 0; i < ioQueue.size(); i++) {
+				// We add its state to current job, 
 				currentJob = ioQueue.get(i);
+				// removie it from the IOqueue because it will be handled. 
 				ioQueue.remove(i);
-
+				// LastJobToIo is set to current job.  
 				lastJobToIo = currentJob;
+				// Set the doingIO flag to true. 
 				currentlyDoingIo = true;
+				// The job is latched to prevent other jobs from from doing IO. 
 				currentJob.latchJob();
-
+				// Siodisk will take the job and its PID so its number of the job whose I/O is to be done. 
 				sos.siodisk(currentJob.getPID());
 				break;
 			}
@@ -308,7 +317,9 @@ public class os {
 		The new job is added to the drumToMainQueue and swapper is invoked. 
 	*/
 	public static void MemoryManager(PCB pcb) {
+		// Job wants to be in main memory
 		drumToMainQueue.add(pcb);
+		// Let the swapper figure things out		
 		Swapper();
 	}
 	
