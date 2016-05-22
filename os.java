@@ -45,33 +45,37 @@ public class os {
 		sos.offtrace();
 	}
 
-	// Crint is called when a new job arrives on the drum.
-	// When Crint is called, it's passed job information.
-	// The new job will be 
-	//	Given a PCB
-	//	Placed on the job table
-	//	Allocated some space
-	//	Scheduled by the CPU
-	//	Loved
+	/* Crint is called when a new job arrives on the drum.
+	 *	When Crint is called, it's passed job information.
+	 *	The new job will be :
+	 *		Given a PCB
+	 *		Placed on the job table
+	 *		Allocated some space
+	 *		Scheduled by the CPU
+	 *		Loved
+	*/
 	public static void Crint(int a[], int p[]) {
+		// If there was a job before it
 		if(lastRunningJob != null) {
+			// See how much it was running for
 			lastRunningJob.calculateTimeProcessed(p[5]);
+			// Put it on the ready queue
 			readyQueue.add(lastRunningJob);
 		}
-
-		currentJob = new PCB(p[1], p[2], p[3], p[4], p[5]);
-
-		jobTable.addJob(currentJob);
-		MemoryManager(currentJob);
-		freeSpaceTable.printFST();
-		CpuScheduler(a, p);
+		
+		currentJob = new PCB(p[1], p[2], p[3], p[4], p[5]);// Job that came in is created
+		jobTable.addJob(currentJob); // Add the new job to the job table
+		MemoryManager(currentJob); // Manage the new job
+		// freeSpaceTable.printFST();
+		CpuScheduler(a, p); // Schedule it
 	}
 
-	// Dskint is called after a job finishes an IO operation(after siodisk is called)
-	// The status of currentlyDoingIo is changed to false.
-	// The job is removed from the ready queue, if it's not null.
-	// If the job is in the job table:
-	//	Its IO count is decremented;
+	/* 	Dskint is called after a job finishes an IO operation(after siodisk is called)
+	 * 	The status of currentlyDoingIo is changed to false.
+	 * 	The job is removed from the ready queue, if it's not null.
+	 * 	If the job is in the job table:
+	 *		Its IO count is decremented
+	*/
 	public static void Dskint(int a[], int p[]) {
 		currentlyDoingIo = false;
 
