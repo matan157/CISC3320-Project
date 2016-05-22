@@ -45,25 +45,34 @@ public class FST_2 {
 	// Save state of job address and its size. 
         int jobAddress = job.getAddress();
         int jobSize = job.getJobSize();
-	// If job is next to another freespace chunk, combine them. 
-        for(FreeSpace fs : FreeSpaceTable) {
-            int chunkAddress = fs.getAddress();
-            int chunkSize = fs.getSize();
-            
-            if(chunkAddress + chunkSize == jobAddress) { // Job After 
-                fs.setSize(chunkSize + jobSize);
-                job.setAddress(-1);
-                return;
-            } else if(jobSize + jobAddress == chunkAddress) { // Job Before
-                fs.setAddress(jobAddress);
-                fs.setSize(jobSize + chunkSize);
-                job.setAddress(-1);
-                return;
-            }
-        }
-        FreeSpaceTable.add(new FreeSpace(jobAddress, jobSize));
-        job.setAddress(-1);
-    }
+	FreeSpaceTable.add( new FreeSpace(jobAddress, jobSize)); 
+	Collections.sort(FreeSpaceTable);
+
+	for( FreeSpace fs1 : FreeSpaceTable ){
+
+		for( FreeSpace fs2 : FreeSpaceTable ){
+
+			int c1Address = fs1.getAddress(); 
+			int c1Size = fs1.getSize(); 
+			int c2Address = fs2.getAddress(); 
+			int c2Size = fs2.getSize();	
+
+			if( c1Address + c1Size == c2Address){
+				fs1.setSize(c1Size + c2Size);
+				fs2.setAddress(-1);
+			}				
+		}
+	}
+	for(FreeSpace fs : FreeSpaceTable)
+		if(fs.getAddress() == -1)
+			FreeSpaceTable.remove(fs);
+
+	Collections.sort(FreeSpaceTable);
+ 	job.setAddress(-1);                
+    } 
+        
+       
+    
     
     
     
