@@ -20,7 +20,7 @@ public class FST_2 {
             int chunkSize = fs.getSize();
             int chunkAddress = fs.getAddress();
             if(chunkSize >= jobSize) {
-                fs.setAddress(chunkAddress + jobSize + 1);
+                fs.setAddress(chunkAddress + jobSize);
                 fs.setSize(chunkSize - jobSize);
                 job.setAddress(chunkAddress);
                 return chunkAddress;
@@ -38,11 +38,11 @@ public class FST_2 {
             int chunkAddress = fs.getAddress();
             int chunkSize = fs.getSize();
             
-            if(chunkAddress + chunkSize + 1 == jobAddress) {
+            if(chunkAddress + chunkSize == jobAddress) {
                 fs.setSize(chunkSize + jobSize);
                 job.setAddress(-1);
                 return;
-            } else if(jobSize + jobAddress + 1 == chunkAddress) {
+            } else if(jobSize + jobAddress == chunkAddress) {
                 fs.setAddress(jobAddress);
                 fs.setSize(jobSize + chunkSize);
                 job.setAddress(-1);
