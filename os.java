@@ -274,9 +274,20 @@ public class os {
 	/*This function is responsible for managing IO requests. 
 		If not currentlyDoingIO and the ioQueue is not empty, currentJob is removed from the ioQueue, 
 		currentlyDoingIO is set to true and the job is latched. Lastly siodisk is called on currentJob.  
+		This is done because siodisk 
 	*/
 	public static void IOManager() {
+		// If the job isn't doing IO, or this io queue size isn't empty then 
+		// then we must take action. 
 		if(!currentlyDoingIo && ioQueue.size() != 0) {
+			// For each io job in the queue, we add its 
+			// state to current job, remove it from the iOqueue 
+			// because it will be dealt with. From there, set 
+			// lastJobToIo to current job and set the doingIO flag 
+			// to true. Then the job is latched to prevent other jobs 
+			// from doing IO. Then the current job is sent to siodisk 
+			// for processing. Siodisk will take the job and its number 
+			// of the job whose I/O is to be done.  
 			for(int i = 0; i < ioQueue.size(); i++) {
 				currentJob = ioQueue.get(i);
 				ioQueue.remove(i);
