@@ -30,7 +30,7 @@ public class FST_2 {
                 fs.setSize(chunkSize - jobSize);
 		// If a portion in the free space table is zero, remove the free space chunk. 
                 if(fs.getSize() == 0) 
-                    FreeSpaceTable.remove(fs);
+                   FreeSpaceTable.remove(fs);
 		// Place job in the smallest chunk it can fit. 
                 job.setAddress(chunkAddress); 
                 return chunkAddress;
@@ -45,30 +45,32 @@ public class FST_2 {
 	// Save state of job address and its size. 
         int jobAddress = job.getAddress();
         int jobSize = job.getJobSize();
-	FreeSpaceTable.add( new FreeSpace(jobAddress, jobSize)); 
-	Collections.sort(FreeSpaceTable);
+        FreeSpaceTable.add( new FreeSpace(jobAddress, jobSize)); 
+        Collections.sort(FreeSpaceTable);
 
-	for( FreeSpace fs1 : FreeSpaceTable ){
+        for( FreeSpace fs1 : FreeSpaceTable ){
 
-		for( FreeSpace fs2 : FreeSpaceTable ){
+            for( FreeSpace fs2 : FreeSpaceTable ){
 
-			int c1Address = fs1.getAddress(); 
-			int c1Size = fs1.getSize(); 
-			int c2Address = fs2.getAddress(); 
-			int c2Size = fs2.getSize();	
+                int c1Address = fs1.getAddress(); 
+                int c1Size = fs1.getSize(); 
+                int c2Address = fs2.getAddress(); 
+                int c2Size = fs2.getSize();	
 
-			if( c1Address + c1Size == c2Address){
-				fs1.setSize(c1Size + c2Size);
-				fs2.setAddress(-1);
-			}				
-		}
-	}
-	for(FreeSpace fs : FreeSpaceTable)
-		if(fs.getAddress() == -1)
-			FreeSpaceTable.remove(fs);
+                if( c1Address + c1Size == c2Address){
+                    fs1.setSize(c1Size + c2Size);
+                    fs2.setAddress(-1);
+                }				
+            }
+        }
+        for(Iterator<FreeSpace> it = FreeSpaceTable.iterator(); it.hasNext();) {
+            FreeSpace fs = it.next();
+            if(fs.getAddress() == -1)
+                it.remove();
+        }
 
-	Collections.sort(FreeSpaceTable);
- 	job.setAddress(-1);                
+        Collections.sort(FreeSpaceTable);
+        job.setAddress(-1);                
     } 
         
        
