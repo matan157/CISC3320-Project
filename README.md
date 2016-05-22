@@ -2,6 +2,7 @@
 Simulating an OS in Java.
 
 ## How to run the project
+*Make sure you have jdk 8 installed. *
 1. Run the command `make` in terminal. This creates the necessary files.
 2. Run the command `java sos`.
 3. For cleanup run `make clean`.
