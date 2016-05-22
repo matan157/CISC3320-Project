@@ -251,23 +251,36 @@ public class os {
 				// Remove from job table
 				jobTable.removeJob(lastRunningJob);
 			}
+		//Request disk I/O
 		} else if(aInt == 6) {
+			//Increment IO Count
 			lastRunningJob.incIoCount();
+			//Add to the IO Count
 			ioQueue.add(lastRunningJob);
+			//Call IOManager
 			IOManager();
+		//Request to be blocked
 		} else if (aInt == 7) {
+			//If IoCount doesn't equal 0
 			if(lastRunningJob.getIoCount() != 0) {
+				//Remove the job from the ready queue
 				readyQueue.remove(lastRunningJob);
+				//Block the job
 				lastRunningJob.blockJob();
+				//Increase the block count 
 				blockCount++;
 				
+				//If the blockCount is greater than BLOCKTHRESHOLD and the job is not latched
 				if(blockCount > BLOCKTHRESHOLD && !lastRunningJob.isLatched()) {
+					//Put the job on the drum 
 					mainToDrumQueue.add(lastRunningJob);
+					//Call swapper to figure out which job goes where
 					Swapper();
 				}
 			}
 		}
-
+		
+		//Call CpuScheduler to decide which job goes next
 		CpuScheduler(a, p);
 	}
 
