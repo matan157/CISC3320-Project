@@ -3232,6 +3232,20 @@ Dilation:  1.07 CPU time:  3500  # I/O operations completed:  3
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                           FINAL STATISTICS
 
 
@@ -3279,39 +3293,50 @@ Average Response time:  9640.07
 
 
 
-			JOBTABLE
+			
+
+
+
+
+
+
+
+
+
+
+				JOBTABLE
 
 Job#  Size  Time CPUTime MaxCPU  I/O's Priority Blocked  Latched InCore Term
           Arrived  Used  Time   Pending
 
 
- 412   40  812309      0   1000    0      1       no      no      no      no 
- 372   19  733313    330    550    1      1       yes     no      yes     no 
- 430   30  846407      0     11    0      1       no      no      no      no 
- 447   23  876315      0     17    0      2       no      no      no      no 
- 442   40  871556      0   1000    0      1       no      no      no      no 
- 355   17  698545    990   5300    1      2       yes     no      no      no 
- 276   47  540563      0  65000    0      5       no      no      no      no 
- 415   17  817039    372   5300    1      2       yes     no      no      no 
- 306   47  599810      0  65000    0      5       no      no      no      no 
- 152   25  298835    930   2500    1      1       yes     no      no      no 
- 216   47  422069      0  65000    0      5       no      no      no      no 
- 186   47  362822     36  65000    1      5       yes     no      no      no 
- 366   47  718304      0  65000    0      5       no      no      no      no 
- 452   25  891305      0   2500    0      1       no      no      no      no 
- 396   47  777551      0  65000    0      5       no      no      no      no 
- 336   47  659057      0  65000    0      5       no      no      no      no 
- 246   47  481316      0  65000    0      5       no      no      no      no 
- 375   15  738043   1620  40000    1      2       yes     yes     yes     no 
- 424   10  836758    726   3500    1      1       yes     no      yes     no 
- 446   21  876296      0     62    0      1       no      no      no      no 
- 426   47  836798      0  65000    0      5       no      no      no      no 
- 427   27  836817     12    100    1      1       yes     no      no      no 
- 432   19  851807     48    550    0      1       no      no      yes     no 
- 437   10  856566    498   1300    1      2       yes     no      yes     no 
- 455   30  896035      0     14    0      2       no      no      no      no 
- 456   47  896045      0  65000    0      5       no      no      no      no 
- 457   27  896064      0    100    0      1       no      no      no      no 
+ 412   40  812309      0   1000   	0      1       no      no      no      no 
+ 372   19  733313    330    550    	1      1       yes     no      yes     no 
+ 430   30  846407      0     11    	0      1       no      no      no      no 
+ 447   23  876315      0     17    	0      2       no      no      no      no 
+ 442   40  871556      0   1000    	0      1       no      no      no      no 
+ 355   17  698545    990   5300    	1      2       yes     no      no      no 
+ 276   47  540563      0  65000    	0      5       no      no      no      no 
+ 415   17  817039    372   5300    	1      2       yes     no      no      no 
+ 306   47  599810      0  65000    	0      5       no      no      no      no 
+ 152   25  298835    930   2500    	1      1       yes     no      no      no 
+ 216   47  422069      0  65000    	0      5       no      no      no      no 
+ 186   47  362822     36  65000    	1      5       yes     no      no      no 
+ 366   47  718304      0  65000    	0      5       no      no      no      no 
+ 452   25  891305      0   2500    	0      1       no      no      no      no 
+ 396   47  777551      0  65000    	0      5       no      no      no      no 
+ 336   47  659057      0  65000    	0      5       no      no      no      no 
+ 246   47  481316      0  65000    	0      5       no      no      no      no 
+ 375   15  738043   1620  40000    	1      2       yes     yes     yes     no 
+ 424   10  836758    726   3500    	1      1       yes     no      yes     no 
+ 446   21  876296      0     62    	0      1       no      no      no      no 
+ 426   47  836798      0  65000    	0      5       no      no      no      no 
+ 427   27  836817     12    100    	1      1       yes     no      no      no 
+ 432   19  851807     48    550    	0      1       no      no      yes     no 
+ 437   10  856566    498   1300    	1      2       yes     no      yes     no 
+ 455   30  896035      0     14    	0      2       no      no      no      no 
+ 456   47  896045      0  65000    	0      5       no      no      no      no 
+ 457   27  896064      0    100    	0      1       no      no      no      no 
 
 
 
