@@ -363,7 +363,9 @@ public class os {
 				if(currentJob.getAddress() >= 0) {
 					// set flag to true. 
 					doingSwap = true;
-					// write the info to siodrum()
+					// write the info to siodrum() for swapping in step, therefore, the last parameter is 
+					// set to 0 because its moving from drum to memory. And we specify the job#, its size, 
+					// and its address. 
 					sos.siodrum(currentJob.getPID(), currentJob.getJobSize(), currentJob.getAddress(), 0);
 					// set current job to lastJobToDrum because Drmint() may have to
 					// use this info. 
@@ -383,19 +385,27 @@ public class os {
 				// Update current job to take job currently the queue. 
 				currentJob = mainToDrumQueue.get(i);
 				// Ensure the job isn't null, the job from main memory to backingstore 
-				// isn't latched, and the current job is greater than the lowest.  
+				// isn't latched, and the current job is greater than the lowest, as in 
+				// the job with the lowest size.  
 				if(currentJob != null && !mainToDrumQueue.get(i).isLatched() && currentJob.getCpuTimeLeft() > lowest) {
+					// Index of the job. 
 					lowestIndex = i;
+					// Assign job size to lowest. 
 					lowest = currentJob.getCpuTimeLeft();
 				}
 			}
-
+			// If the lowest job has time to run. 
 			if(lowest > 0) {
+				// Update flag. 
 				doingSwap = true;
+				// Assign state of the lowest job size to the current job. 
 				currentJob = mainToDrumQueue.get(lowestIndex);
+				// Specify job to be swapped out.  
 				sos.siodrum(currentJob.getPID(), currentJob.getJobSize(), currentJob.getAddress(), 1);
+				// Update last job to drum since it was just swapped out.  
 				lastJobToDrum = currentJob;
 
+				// remove the lastJobToDrum from respective queues because it was swapped out.  
 				readyQueue.remove(lastJobToDrum);
 				ioQueue.remove(lastJobToDrum);
 				mainToDrumQueue.remove(lastJobToDrum);
