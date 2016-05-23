@@ -1,36 +1,47 @@
+/*
+	CISC 3320 Project - Spring 2016
+	Operating Systems with Professor Jones
+	
+	Created by Matan Uchen, Nicholas Galarza, Shahrukh Jalil.
+	
+	This system simulates the functions of a basic Operating System using
+	five main interrupts. 
+*/
 import java.util.ArrayList;
 import java.util.List;
 
 public class os {
-
+	// Data Structures created by our team
 	private static JobTable jobTable;
 	private static FST_2 freeSpaceTable;
-
-	private static List<PCB> readyQueue = new ArrayList<PCB>();
-	private static List<PCB> drumToMainQueue = new ArrayList<PCB>();
-	private static List<PCB> mainToDrumQueue = new ArrayList<PCB>();
-	private static List<PCB> ioQueue = new ArrayList<PCB>();
-
-	private static PCB lastRunningJob;
-	private static PCB lastJobToIo;
-	private static PCB lastJobToDrum;
-	private static PCB currentJob;
-
+	private static CPU cpu;
+	// Keeping a couple of queues
+	public static List<PCB> readyQueue = new ArrayList<PCB>();
+	public static List<PCB> drumToMainQueue = new ArrayList<PCB>();
+	public static List<PCB> mainToDrumQueue = new ArrayList<PCB>();
+	public static List<PCB> ioQueue = new ArrayList<PCB>();
+	// PCB's for keeping track
+	public static PCB lastRunningJob;
+	public static PCB lastJobToIo;
+	public static PCB lastJobToDrum;
+	public static PCB currentJob;
+	// Status variables
 	private static int blockCount;
 	private static boolean currentlyDoingIo;
 	private static boolean doingSwap;
-	
-	private static final int MAX_NUM_JOBS = 50;
-	private static final int MEMORY_SIZE = 100;
-	private static final int ROUNDROBINSLICE = 9;
-	private static final int BLOCKTHRESHOLD = 1;
+	// Constants
+	public static final int MAX_NUM_JOBS = 50;
+	public static final int MEMORY_SIZE = 100;
+	public static final int ROUNDROBINSLICE = 9;
+	public static final int BLOCKTHRESHOLD = 1;
 
 	// startup is called at the beginning
-	// of the simulation. Initializes all my
+	// of the simulation. Initializes all of my
 	// rad variables.
 	public static void startup() {
 		jobTable = new JobTable(MAX_NUM_JOBS);
 		freeSpaceTable = new FST_2();
+		cpu = new CPU();
 
 		lastRunningJob = null;
 		lastJobToIo = null;
@@ -67,7 +78,7 @@ public class os {
 		jobTable.addJob(currentJob); // Add the new job to the job table
 		MemoryManager(currentJob); // Manage the new job
 		// freeSpaceTable.printFST();
-		CpuScheduler(a, p); // Schedule it
+		cpu.Schedule(a, p); // Schedule it
 	}
 
 	/* 	Dskint is called after a job finishes an IO operation(after siodisk is called)
@@ -114,7 +125,7 @@ public class os {
 		}
 		//freeSpaceTable.printFST();
 		IOManager(); // Manage your IO
-		CpuScheduler(a, p); // Schedule
+		cpu.Schedule(a, p); // Schedule
 	}
 	/* Drmint() -- called after sos.siodrum() is called. 
 	 *
@@ -125,7 +136,7 @@ public class os {
 	 * placed into the drum from the main memory queue. And it is removed from the 
 	 * main memory to drum queue. 
 	 *
-	 * Subsequent calls to Swapper() and CpuScheduler() are then made. 
+	 * Subsequent calls to Swapper() and cpu.Schedule() are then made. 
 	 */
 	public static void Drmint(int a[], int p[]) {
 		doingSwap = false;
@@ -167,7 +178,7 @@ public class os {
 		Swapper(); // Make all swaps
 		
 		// freeSpaceTable.printFST();
-		CpuScheduler(a, p);// Schedule it
+		cpu.Schedule(a, p);// Schedule it
 	}
 	/* Tro() -- Invoked when "running job has run out of time."
 	 * If the job has used up its maximum time allocation or its time slice.  
@@ -205,7 +216,7 @@ public class os {
 			readyQueue.add(currentJob);
 		}
 		// Schedule
-		CpuScheduler(a, p);
+		cpu.Schedule(a, p);
 	}
 
 	/*This function is invoked when a running job wants a service. The job can request termination, request disk I/O, or 
@@ -280,8 +291,8 @@ public class os {
 			}
 		}
 		
-		//Call CpuScheduler to decide which job goes next
-		CpuScheduler(a, p);
+		//Call cpu.Schedule to decide which job goes next
+		cpu.Schedule(a, p);
 	}
 
 	/*This function is responsible for managing IO requests. 
@@ -389,76 +400,6 @@ public class os {
 				ioQueue.remove(lastJobToDrum);
 				mainToDrumQueue.remove(lastJobToDrum);
 			}
-		}
-	}
-	/* CpuScheduler() -- Invoked from other interrupt handlers to select order of jobs to run.
-	 * The scheduler accesses the smallest unblocked job by index. If such a job exists, it will 
-	 * be dispatched(). 
-	 */  	
-	public static void CpuScheduler(int a[], int p[]) {
-		//Intialize two local variables to keep track of lowest job size and the index of that job. 
-		int lowest = 0;
-		int lowestIndex = 0;
-
-		//Search the readyQueue for the job. 
-		for(int i = 0; i < readyQueue.size(); i++) {
-			// Finds smallest job out of unblocked jobs.  
-			if(lowest == 0 && !readyQueue.get(i).isBlocked()) {
-				//Get the currentJob from the readyQueue 
-				currentJob = readyQueue.get(i);
-				//Set lowest to currentJob Size 
-				lowest = currentJob.getJobSize();
-				//Set the lowestIndex to the iterator
-				lowestIndex = i;
-			}
-
-			currentJob = readyQueue.get(i);
-			// If every job is blocked, null, terminated, then it means that there is no process to run. 
-			if(currentJob != null && !currentJob.isBlocked() && !currentJob.isTerminated() && currentJob.getJobSize() < lowest) {
-				lowestIndex = i;
-				lowest = currentJob.getJobSize();
-			}
-		}
-
-		//If lowest is greater than 0
-		if(lowest > 0) {
-			//Get the lowest index of the job from the readyQueue
-			currentJob = readyQueue.get(lowestIndex);
-			//Call the dispatcher 
-			Dispatcher(a, p);
-			//While the readyQueue contains the current job remove it 
-			while(readyQueue.contains(currentJob))
-				readyQueue.remove(currentJob);
-			return;
-		}
-		//a[0]= 1, "There are no jobs ready to run".
-		lastRunningJob = null;
-		a[0] = 1;
-	}
-	/* Dispatcher() -- "Sets CPU registers before context switches". 
-	 * After taking in the address, and jobsize, this will run the 
-	 * current job. Either the job will be run for the duration of 
-	 * the round robin slice, or for the remainder of how much the 
-	 * job has left. 
-	 */
-	public static void Dispatcher(int a[], int p[]) {
-		//Set last running job to currentJob 
-		lastRunningJob = currentJob;
-		//Set the last time the job was running
-		lastRunningJob.setLastTimeProcessing(p[5]);
-		
-		// a[0]= 2, "Set CPU to run mode, must set p values". Specifically, p[2,3,4]. 
-		a[0] = 2;
-		//Get the address of job 
-		p[2] = lastRunningJob.getAddress();
-		//Get the size of the job 
-		p[3] = lastRunningJob.getJobSize();
-
-		//Don't let the job run more than the CPU time it has left
-		if(lastRunningJob.getCpuTimeLeft() > ROUNDROBINSLICE) {
-			p[4] = ROUNDROBINSLICE;
-		} else {
-			p[4] = lastRunningJob.getCpuTimeLeft();
 		}
 	}
 }
