@@ -117,6 +117,7 @@ public class os {
 					lastJobToIo.unblockJob();
 					blockCount--;
 					readyQueue.add(lastJobToIo);
+				// It really wants to be on the ready queue
 				} else {
 					readyQueue.add(lastJobToIo);
 				}
@@ -196,11 +197,11 @@ public class os {
 
 		// If the amount of CPU time it used is over the allowed time
 		if(lastRunningJob.getCpuTimeUsed() >= lastRunningJob.getMaxCpuTime()) {
-			// If it has no IO pending
+			// If it has IO pending
 			if(lastRunningJob.getIoCount() > 0) {
 				// Terminate it
 				lastRunningJob.terminateJob();
-			// If it can still has IO
+			// If it has no IO
 			} else {
 				// Free up some space
 				freeSpaceTable.addSpace(lastRunningJob);
@@ -301,15 +302,15 @@ public class os {
 		This is done because siodisk 
 	*/
 	public static void IOManager() {
-		// If the job isn't doing IO, or this io queue size isn't empty then 
+		// If the job isn't doing IO, and this io queue size isn't empty then 
 		// then we must take action. 
 		if(!currentlyDoingIo && ioQueue.size() != 0) {
 			
-		        // For each IO job in the queue ...	
+		   	// For each IO job in the queue ...	
 			for(int i = 0; i < ioQueue.size(); i++) {
 				// We add its state to current job, 
 				currentJob = ioQueue.get(i);
-				// removie it from the IOqueue because it will be handled. 
+				// remove it from the IOqueue because it will be handled. 
 				ioQueue.remove(i);
 				// LastJobToIo is set to current job.  
 				lastJobToIo = currentJob;

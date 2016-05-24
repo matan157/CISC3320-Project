@@ -16,5 +16,5 @@ FST_2.class: FST_2.java
 CPU.class: CPU.java
 	javac CPU.java
 
-clean:
+clean: $(CLASSES)
 	rm $(CLASSES)
